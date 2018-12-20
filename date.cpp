@@ -4,7 +4,16 @@
 #include <iostream>
 #include <limits>
 
+Date::Date()
+    : day_(1), month_(Month::January), year_(1),
+    s_(Separator::dot), format_(Format::ddmmyyyy),
+    valid_(false), total_days_(0) {}
+
 void Date::applyDelta(int days) {
+    if (!valid_) {
+        std::cerr << "applyDelta canceled. Trying to operate on malformed date.\n";
+        return;
+    }
     int temp = total_days_ + days;
     if (temp < 0) {
         std::cerr << "Operation is not permitted."
@@ -15,7 +24,12 @@ void Date::applyDelta(int days) {
     countDate();
 }
 
-int Date::operator- (const Date& dt) {
+int Date::operator- (const Date& dt) const {
+    if (!valid_ or !dt.valid_) {
+        std::cerr << "Cant calculate date difference. Either one or both dates are invalid.\n";
+        return 0;
+    }
+    std::cout << "first: " << total_days_ << "\nsecond: " << dt.total_days_ << '\n';
     return total_days_ - dt.total_days_;
 }
 
@@ -54,6 +68,7 @@ void Date::countDate() {
         month_ = static_cast<Month>(imonth);
         day_ = temp+1;
     }
+    valid_ = isValid();
 }
 
 bool Date::isYearLeap(int year) const {
@@ -72,20 +87,16 @@ bool Date::isYearLeap(int year) const {
     }
 }
 
-bool Date::isValid(int day,
-            Month month,
-            int year,
-            Separator s,
-            Format fmt) const {
-    if (day < 1 || year < 1 || static_cast<int>(month) < 1 || static_cast<int>(month) > 12) {
+bool Date::isValid() const {
+    if (day_ < 1 || year_ < 1 || static_cast<int>(month_) < 1 || static_cast<int>(month_) > 12) {
         return 0;
     }
 
-    if (month != Month::February && day > daysInMonth[static_cast<int>(month)]) {
+    if (month_ != Month::February && day_ > daysInMonth[static_cast<int>(month_)]) {
         return 0;
     }
-    if (month == Month::February
-            && ((isYearLeap(year) && day > 29) || (!isYearLeap(year) && day > 28))) {
+    if (month_ == Month::February
+            && ((isYearLeap(year_) && day_ > 29) || (!isYearLeap(year_) && day_ > 28))) {
         return 0;
     }
     return 1;
@@ -97,22 +108,17 @@ int Date::setDate(int day,
                 Separator s,
                 Format fmt)
 {
-
-    valid_ = isValid(day, month, year, s, fmt);
-    if (!valid_)
-        return 0;
-
     day_ = day;
     month_ = month;
     year_ = year;
     s_ = s;
     format_ = fmt;
 
+    valid_ = isValid();
+    if (!valid_)
+        return 0;
     total_days_ = countDays();
 
-/*    std::cout << "date: " << day_ << static_cast<char>(s_)
-        << static_cast<int>(month_) << static_cast<char>(s_)
-        << year_ << "\n";*/
     return 1;
 }
 
@@ -203,34 +209,20 @@ int Date::grepAndSetDate(std::string date_string, Format fmt) {
             }
         }
     } else {
-        std::cerr << "that was kind of a shitty date bro..";
+        std::cerr << "Bad date";
         return -1;
     }
     return 1;
 }
 
-Date::Date(std::string& dt) {
-    /* parseString(dt);
-    if (allGood()) {
-        grepAndSetDate();
-        return;
-    } else {
-        callShitCoverFunction()
-    }*/
-
-}
-
-Date::Date(const char* date) {
-
-}
-
 std::istream& operator>> (std::istream& is, Date& dt) {
     std::cout << "Choose one of the three forms:\n"
-        << "\tddmmyyyy (type 1) <--default\n"
+        << "\tddmmyyyy (type 1)\n"
         << "\tmmddyyyy (type 2)\n"
         << "\tyyyymmdd (type 3)\n";
     int choice = 1;
     std::cin >> choice;
+    std::cin.ignore();
 
     std::cout << "Enter date in the format that you picked.\n"
                 << "Use one of the following separators: [./-] or space:\n";
@@ -278,5 +270,5 @@ std::string Date::format() const {
         case Format::mmddyyyy: return "mmddyyyy"; break;
         case Format::yyyymmdd: return "yyyymmdd";
     }
-    return "call 911, emergency needed";
+    return "Never have I ever been in this statement";
 }

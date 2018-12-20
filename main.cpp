@@ -3,8 +3,6 @@
 int main() {
     Date dt;
      std::cin >> dt;
-/*    std::cout << "================================================\n";
-    std::cout << dt << '\n';*/
     Date dt2;
     dt.setFormat(Format::mmddyyyy);
     std::cin >> dt2;

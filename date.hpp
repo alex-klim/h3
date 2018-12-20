@@ -18,9 +18,9 @@ static constexpr size_t daysSinceYearStarted[13] = {
 class Date
 {
 public:
-    Date() = default;
+    Date();
     Date(std::string&);
-    Date(const char*);
+
     int grepAndSetDate(std::string, Format);
     int setDate(int day,
             Month month,
@@ -28,21 +28,18 @@ public:
             Separator s,
             Format fmt);
     bool isYearLeap(int) const;
-    bool isValid(int day,
-            Month month,
-            int year,
-            Separator s,
-            Format fmt) const;
-    std::string format() const;
-    void applyDelta(int);
+    bool isValid() const;
     void setFormat(const Format&);
-    int operator- (const Date&);
+    std::string format() const;
+
+    int operator- (const Date&) const;
+    void applyDelta(int);
+
     friend std::istream& operator>> (std::istream&, Date&);
     friend std::ostream& operator<< (std::ostream&, const Date&);
 private:
     size_t countDays(); // count total_days_ for current date
-    void countDate(); // cout date from total_days_
-
+    void countDate(); // count date from total_days_
 private:
     int day_;
     Month month_;
