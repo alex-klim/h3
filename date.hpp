@@ -19,9 +19,9 @@ class Date
 {
 public:
     Date();
-    Date(std::string&);
+    Date(std::string, Format = Format::ddmmyyyy);
 
-    int grepAndSetDate(std::string, Format);
+    int grepAndSetDate(const std::string, Format);
     int setDate(int day,
             Month month,
             int year,

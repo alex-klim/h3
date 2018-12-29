@@ -2,14 +2,17 @@
 
 int main() {
     Date dt;
-     std::cin >> dt;
-    Date dt2;
+    std::cin >> dt;
+    Date dt2("1212315.04.2542asdasd");
+    std::cout << "dt2: " << dt2 << '\n';
+    std::cout << "changing format of dt1 to mmddyyyy\n";
     dt.setFormat(Format::mmddyyyy);
-    std::cin >> dt2;
+    std::cout << "**********************************************\n";
     int temp = dt2 - dt;
-    std::cout << temp << '\n';
+    std::cout << "dt2 - dt1 = " << temp << '\n';
+    std::cout << "**********************************************\n";
     dt.applyDelta(temp);
-    std::cout << dt << '\n';
+    std::cout << "dt.applyDelta:\n" << dt << '\n';
 
     return 0;
 }

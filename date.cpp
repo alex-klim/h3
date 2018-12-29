@@ -9,6 +9,10 @@ Date::Date()
     s_(Separator::dot), format_(Format::ddmmyyyy),
     valid_(false), total_days_(0) {}
 
+Date::Date(const std::string st, Format fmt) {
+    grepAndSetDate(st, fmt);
+}
+
 void Date::applyDelta(int days) {
     if (!valid_) {
         std::cerr << "applyDelta canceled. Trying to operate on malformed date.\n";
@@ -29,7 +33,6 @@ int Date::operator- (const Date& dt) const {
         std::cerr << "Cant calculate date difference. Either one or both dates are invalid.\n";
         return 0;
     }
-    std::cout << "first: " << total_days_ << "\nsecond: " << dt.total_days_ << '\n';
     return total_days_ - dt.total_days_;
 }
 
@@ -58,7 +61,7 @@ void Date::countDate() {
     while (temp > daysInMonth[imonth]) {
         temp -= daysInMonth[imonth];
         if (imonth == 2 && isYearLeap(year_))
-            temp=-1;
+            temp-= 1;
         imonth++;
     }
     if (imonth == 3 && temp == 1 && isYearLeap(year_)){
@@ -92,12 +95,14 @@ bool Date::isValid() const {
         return 0;
     }
 
-    if (month_ != Month::February && day_ > daysInMonth[static_cast<int>(month_)]) {
-        return 0;
-    }
-    if (month_ == Month::February
-            && ((isYearLeap(year_) && day_ > 29) || (!isYearLeap(year_) && day_ > 28))) {
-        return 0;
+    if (day_ > daysInMonth[static_cast<int>(month_)]) {
+        if (month_ == Month::February){
+            if (isYearLeap(year_) && day_ > 29) {
+                return 0;
+            } else if (!isYearLeap(year_) && day_ == 29) {
+                return 0;
+            }
+        }
     }
     return 1;
 }
@@ -124,9 +129,9 @@ int Date::setDate(int day,
 
 int Date::grepAndSetDate(std::string date_string, Format fmt) {
     // ddmmyyy or mmddyyy
-    std::regex year_last("(\\d?\\d)([\\/\\.\\-\\s])(\\d?\\d)[\\/\\.\\-\\s](\\d?\\d?\\d?\\d)");
+    std::regex year_last("(\\d{1,2})([\\/\\.\\-\\s])(\\d{1,2})[\\/\\.\\-\\s](\\d{1,4})");
     // yyyymmdd
-    std::regex year_first("\\d?\\d?\\d?\\d([\\/\\.\\-\\s])\\d?\\d[\\/\\.\\-\\s]\\d?\\d");
+    std::regex year_first("(\\d{1,4})([\\/\\.\\-\\s])(\\d{1,2})[\\/\\.\\-\\s](\\d{1,2})");
 
     std::smatch match;
 
@@ -222,14 +227,13 @@ std::istream& operator>> (std::istream& is, Date& dt) {
         << "\tyyyymmdd (type 3)\n";
     int choice = 1;
     std::cin >> choice;
-    std::cin.ignore();
+    std::cin.ignore(128, '\n');
 
     std::cout << "Enter date in the format that you picked.\n"
                 << "Use one of the following separators: [./-] or space:\n";
 
-    char  date_string[128];
-    std::cin.ignore();
-    std::cin.getline(date_string, std::numeric_limits<unsigned>::max());
+    char date_string[128];
+    std::cin.getline(date_string, 128);
 
     switch(choice) {
         case 1: dt.grepAndSetDate(date_string, Format::ddmmyyyy); break;
@@ -245,17 +249,20 @@ std::ostream& operator<< (std::ostream& os, const Date& dt) {
         return os;
     }
     if (dt.format_ == Format::ddmmyyyy) {
-        os << "date: " << dt.day_ << static_cast<char>(dt.s_)
+        os << dt.day_ << static_cast<char>(dt.s_)
         << static_cast<int>(dt.month_) << static_cast<char>(dt.s_)
-        << dt.year_;
+        << dt.year_
+        << " (" << dt.format() << ")";
     } else if (dt.format_ == Format::mmddyyyy) {
-        os << "date: "<< static_cast<int>(dt.month_) << static_cast<char>(dt.s_)
+        os << static_cast<int>(dt.month_) << static_cast<char>(dt.s_)
            << dt.day_ << static_cast<char>(dt.s_)
-           << dt.year_;
+           << dt.year_
+           << " (" << dt.format() << ")";
     } else if (dt.format_ == Format::yyyymmdd) {
-        os << "date: "<< dt.year_ << static_cast<char>(dt.s_)
+        os << dt.year_ << static_cast<char>(dt.s_)
            << static_cast<int>(dt.month_) << static_cast<char>(dt.s_)
-           << dt.day_;
+           << dt.day_
+           << " (" << dt.format() << ")";
     }
     return os;
 }
