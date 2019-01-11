@@ -129,9 +129,9 @@ int Date::setDate(int day,
 
 int Date::grepAndSetDate(std::string date_string, Format fmt) {
     // ddmmyyy or mmddyyy
-    std::regex year_last("(\\d{1,2})([\\/\\.\\-\\s])(\\d{1,2})[\\/\\.\\-\\s](\\d{1,4})");
+    std::regex year_last("(\\d{1,2})([\\/\\.\\s\\-])(\\d{1,2})[\\/\\.\\s\\-](\\d{1,4})");
     // yyyymmdd
-    std::regex year_first("(\\d{1,4})([\\/\\.\\-\\s])(\\d{1,2})[\\/\\.\\-\\s](\\d{1,2})");
+    std::regex year_first("(\\d{1,4})([\\/\\.\\s\\-])(\\d{1,2})[\\/\\.\\s\\-](\\d{1,2})");
 
     std::smatch match;
 
